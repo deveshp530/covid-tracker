@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@material-ui/core";
 import "./App.css";
-import { sortData } from "./util";
+import { sortData, formatInfo } from "./util";
 import InfoBox from "./components/InfoBox";
 import Map from "./components/Map";
 import Table from "./components/Table";
@@ -22,7 +22,7 @@ function App() {
   const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng: -40.4796 });
   const [mapZoom, setMapZoom] = useState(3);
   const [mapCountries, setMapCountries] = useState([]);
-
+  const [casesType, setCasesType] = useState("cases");
 
   useEffect(() => {
     fetch("https://disease.sh/v3/covid-19/all")
@@ -43,7 +43,7 @@ function App() {
           }));
           const sortedData = sortData(data);
           setTableData(sortedData);
-          setMapCountries(data)
+          setMapCountries(data);
           setCountries(countries);
         });
     };
@@ -88,35 +88,44 @@ function App() {
         </div>
         <div className="app__stats">
           <InfoBox
+            isRed
+            active={casesType === "cases"}
+            onClick={(e) => setCasesType("cases")}
             title="Cases today"
-            cases={countryInfo.todayCases}
-            total={countryInfo.cases}
+            cases={formatInfo(countryInfo.todayCases)}
+            total={formatInfo(countryInfo.cases)}
           />
 
           <InfoBox
+            active={casesType === "recovered"}
+            onClick={(e) => setCasesType("recovered")}
             title="Recovered today"
-            cases={countryInfo.todayRecovered}
-            total={countryInfo.recovered}
+            cases={formatInfo(countryInfo.todayRecovered)}
+            total={formatInfo(countryInfo.recovered)}
           />
 
           <InfoBox
+            isRed
+            active={casesType === "deaths"}
+            onClick={(e) => setCasesType("deaths")}
             title="Deaths today"
-            cases={countryInfo.todayDeaths}
-            total={countryInfo.deaths}
+            cases={formatInfo(countryInfo.todayDeaths)}
+            total={formatInfo(countryInfo.deaths)}
           />
         </div>
-        <Map 
-        countries = {mapCountries}
-        center={mapCenter} 
-        zoom={mapZoom} 
+        <Map
+          casesType={casesType}
+          countries={mapCountries}
+          center={mapCenter}
+          zoom={mapZoom}
         />
       </div>
       <Card className="app__right">
         <CardContent>
           <h3>Live Cases by Country</h3>
           <Table countries={tableData} />
-          <h3>Worldwide New Cases</h3>
-          <Graph />
+          <h3 className='app__title'>Worldwide New {casesType}</h3>
+          <Graph className='app__graph' casesType={casesType} />
         </CardContent>
       </Card>
     </div>
